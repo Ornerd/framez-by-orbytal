@@ -11,9 +11,12 @@ const ScreenWrapper = ({children, bg} : ScreenWrapperProps) => {
 
   const {top} = useSafeAreaInsets();
   const paddingTop = top > 0 ? top+5 : 30
+  
+  const {bottom} = useSafeAreaInsets();
+  const paddingBottom = bottom > 0 ? bottom+5 : 30
 
   return (
-    <View style= {{flex: 1, paddingTop, backgroundColor: bg}}>
+    <View style= {{flex: 1, paddingTop, backgroundColor: bg, paddingBottom}}>
       {
         children
       }

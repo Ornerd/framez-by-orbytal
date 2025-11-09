@@ -1,3 +1,5 @@
+import { TextStyle } from "react-native";
+
 export const theme = {
     colors: {
         primary: '#00C26F',
@@ -15,10 +17,10 @@ export const theme = {
     },
 
     fonts: {
-        medium : '500',
-        semiBold: '600',
-        bold: '700',
-        extraBold: '800'
+        medium : '500'  as TextStyle['fontWeight'],
+        semiBold: '600' as TextStyle['fontWeight'],
+        bold: '700' as TextStyle['fontWeight'],
+        extraBold: '800' as TextStyle['fontWeight']
     },
 
     radius: {
