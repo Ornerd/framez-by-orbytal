@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
    },
 
    textContainer: {
-    marginTop: 80
+    marginTop: 60
    },
 
    form: {
