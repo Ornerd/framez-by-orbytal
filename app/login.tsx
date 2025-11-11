@@ -24,7 +24,7 @@ const Login = () => {
             <View style={styles.form}>
               <Input
                icon={<Icon name= 'mail' 
-               placeholder='Email Address'
+              //  placeholder='Email Address'
                onChangeText= {value=> {}}
                />}
               />
@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
    },
 
    form: {
-    gap: 25
+    gap: 25,
+    width: '100%',
    }
 })
