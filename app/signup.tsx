@@ -27,7 +27,7 @@ const Signup = () => {
     let newErrors = { name: '', email: '', password: '' }
 
     if (!nameRef.current.trim()) {
-      newErrors.name = 'Please enter your password'
+      newErrors.name = 'Please enter your name'
     }
 
     if (!emailRef.current.trim()) {
