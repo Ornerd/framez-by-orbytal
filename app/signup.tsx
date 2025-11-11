@@ -55,7 +55,7 @@ const Signup = () => {
 
             <View style={styles.form}>
               <Input
-               icon={<Icon name= 'mail'/>}
+               icon={<Icon name= 'user'/>}
                placeholder='Name'
                onChangeText= {value=> {nameRef.current = value
                 if (errors.name) setErrors(prev => ({ ...prev, name: '' }))
