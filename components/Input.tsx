@@ -9,8 +9,7 @@ const Input = (props: TextInputProps & {icon?: React.ReactNode, inputRef?: React
             props.icon && props.icon
         }
       <TextInput
-      style = {{flex:1, width: 200, backgroundColor: 'yellow'}}
-      placeholder='email please'
+      style = {{flex:1}}
       placeholderTextColor={theme.colors.textLight}
       ref={props.inputRef && props.inputRef}
       {...props}

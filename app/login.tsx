@@ -1,18 +1,45 @@
 import Icon from '@/assets/icons'
 import BackButton from '@/components/BackButton'
+import Button from '@/components/Button'
 import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
 import { useRouter } from 'expo-router'
-import React from 'react'
-import { StatusBar, StyleSheet, Text, View } from 'react-native'
+import React, { useRef, useState } from 'react'
+import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
 
 const Login = () => {
 
   const router = useRouter();
+  const emailRef = useRef('')
+  const passwordRef = useRef('')
+  const [loading, setLoading] = useState(false)
+
+  const [errors, setErrors] = useState({ email: '', password: '' })
+    // ✅ Email format validator
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return regex.test(email)
+  }
+
+  const onSubmit = async () => {
+    let newErrors = { email: '', password: '' }
+
+    if (!emailRef.current.trim()) {
+      newErrors.email = 'Please enter your email address'
+    }else if (!isValidEmail(emailRef.current.trim())) {
+      newErrors.email = 'Please enter a valid email address'
+    }
+
+    if (!passwordRef.current.trim()) {
+      newErrors.password = 'Please enter your password'
+    }
+
+    setErrors(newErrors)
+  }
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper bg='white'>
       <StatusBar barStyle="light-content" />
         <View style={styles.container}>
           <BackButton router={router}/>
@@ -23,12 +50,44 @@ const Login = () => {
 
             <View style={styles.form}>
               <Input
-               icon={<Icon name= 'mail' 
-              //  placeholder='Email Address'
-               onChangeText= {value=> {}}
-               />}
+               icon={<Icon name= 'mail'/>}
+               placeholder='Email Address'
+               onChangeText= {value=> {emailRef.current = value
+                if (errors.email) setErrors(prev => ({ ...prev, email: '' }))
+               }}
+              />
+              {errors.email && (<Text style={styles.errorText}>{errors.email}</Text>)}
+
+              <Input
+               icon={<Icon name= 'lock'/>}
+               placeholder='Password'
+               secureTextEntry
+               onChangeText= {value=> {passwordRef.current = value
+                if (errors.password) setErrors(prev => ({ ...prev, password: '' }))
+               }}
+               
+              />
+              {errors.password && (<Text style={styles.errorText}>{errors.password}</Text>)}
+
+              {/* <Text>
+                Forgot Password?
+              </Text> */}
+
+              <Button
+              title='Login'
+              loading={loading}
+              onPress={onSubmit}
+              buttonStyle={styles.submitButton}
               />
             </View>
+
+            <View style={styles.loginInstead}>
+              <Text>Don't have an account yet?</Text>
+              <Pressable  onPress={()=> router.push('/signup')}>
+                  <Text style={styles.loginCta}>Signup</Text>
+              </Pressable>
+            </View>
+  
         </View>
     </ScreenWrapper>
    
@@ -58,5 +117,30 @@ const styles = StyleSheet.create({
    form: {
     gap: 25,
     width: '100%',
-   }
+   },
+
+   submitButton: {
+     marginTop: 16,
+   },
+
+   loginInstead: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        alignSelf: 'center',
+        gap: 5,
+        marginTop: 16,
+    },
+
+    loginCta: {
+        textDecorationLine: 'underline',
+        fontSize: 16,
+        fontWeight: theme.fonts.semiBold,
+        color: theme.colors.primary
+    },
+
+    errorText: {
+      color: 'red',
+      marginTop: -20
+    }
 })
