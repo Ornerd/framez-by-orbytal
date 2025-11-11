@@ -7,10 +7,10 @@ export default function Index() {
   const router = useRouter()
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper >
       <Button onPress={()=> router.push('/welcome')}>
         Welcome
       </Button>
-    </ScreenWrapper>
+    </ScreenWrapper >
   );
 }

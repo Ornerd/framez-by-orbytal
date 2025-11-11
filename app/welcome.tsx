@@ -2,10 +2,14 @@ import Button from '@/components/Button'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
 import { heigthPercentage } from '@/helpers/common'
+import { useRouter } from 'expo-router'
 import React from 'react'
 import { Image, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
 
 const Welcome = () => {
+
+    const router = useRouter()
+
   return (
     <ScreenWrapper bg= "white">
       <StatusBar barStyle="dark-content" />
@@ -19,10 +23,11 @@ const Welcome = () => {
             <View style={styles.cta}>
                 <Button
                 title='Get Started'
+                onPress={()=> router.push('/signup')}
                 />
                 <View style={styles.loginInstead}>
                     <Text>Already have an account?</Text>
-                    <Pressable>
+                    <Pressable  onPress={()=> router.push('/login')}>
                         <Text style={styles.loginCta}>Login</Text>
                     </Pressable>
                 </View>
