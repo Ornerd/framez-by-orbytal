@@ -27,6 +27,10 @@ const EditProfile = () => {
         address: ''
     })
 
+    const pickImage = ()=> {
+        
+    }
+
     useEffect(()=> {
         if(currentUser) {
             setUser({
@@ -84,7 +88,7 @@ const EditProfile = () => {
                 <View style={styles.form}>
                     <View style={styles.avatarContainer}>
                         <Image source={imageSource} style={styles.avatar} />
-                        <Pressable style={styles.avatarIcon}>
+                        <Pressable style={styles.avatarIcon} onPress={pickImage}>
                             <Icon name='camera' size={20} strokeWidth={2.5} />
                         </Pressable>
                     </View>
