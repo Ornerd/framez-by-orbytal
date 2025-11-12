@@ -2,10 +2,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 
 // 1. Define the type for the user object (adjust properties as needed)
 interface User {
-    // Example properties:
-    id: string;
-    name: string;
-    email: string;
+    [key: string]: any;
     // Add other user properties here
 }
 
