@@ -74,7 +74,7 @@ const UserHeader = ({user, router, doTheLogout}: {user: any, router: any, doTheL
 
               <View style={{alignItems: 'center', gap: 4}}>
                   <Text style={styles.userName}>
-                    {user && user.name}
+                    {user && user.name || user.user_metadata?.name}
                   </Text>
                   <Text style={styles.infoText}>
                     {user && user.address}
