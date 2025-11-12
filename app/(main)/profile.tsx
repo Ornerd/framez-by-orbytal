@@ -74,10 +74,10 @@ const UserHeader = ({user, router, doTheLogout}: {user: any, router: any, doTheL
 
               <View style={{alignItems: 'center', gap: 4}}>
                   <Text style={styles.userName}>
-                    {user && user.user_metadata?.name}
+                    {user && user.name}
                   </Text>
                   <Text style={styles.infoText}>
-                    {user && user.user_metadata?.address}
+                    {user && user.address}
                   </Text>
               </View>
 
@@ -99,7 +99,12 @@ const UserHeader = ({user, router, doTheLogout}: {user: any, router: any, doTheL
                   color={theme.colors.textLight}
                   />
                   <Text style={styles.infoText}>
-                    {user && user.user_metadata?.phoneNumber}
+                    {user && user.phoneNumber}
+                  </Text>
+                </View>
+                 <View style={styles.info}>
+                  <Text style={styles.infoText}>
+                    {user && user.bio}
                   </Text>
                 </View>
               </View>
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
 
   info: {
     flexDirection: 'row',
-    gap: 5
+    gap: 8
   },
 
   infoText: {

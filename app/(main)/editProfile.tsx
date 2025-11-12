@@ -1,19 +1,25 @@
 import Icon from '@/assets/icons'
+import Button from '@/components/Button'
 import Header from '@/components/Header'
 import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
 import { getUserImageSrc } from '@/services/imagesService'
+import { updateUser } from '@/services/userService'
 import { Image } from 'expo-image'
-import React, { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import React, { useEffect, useState } from 'react'
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 const EditProfile = () => {
 
-    const {user}= useAuth()
+    const router = useRouter()
 
-    const [theUser, setTheUser]=  useState({
+    const {user: currentUser, setUserData}= useAuth();
+    const [loading, setLoading] = useState(false)
+
+    const [user, setUser]=  useState({
         name: '',
         phoneNumber: '',
         image: null,
@@ -21,12 +27,55 @@ const EditProfile = () => {
         address: ''
     })
 
+    useEffect(()=> {
+        if(currentUser) {
+            setUser({
+                name: currentUser.name || '',
+                phoneNumber: currentUser.phoneNumber || '',
+                image: currentUser.image || null,
+                address: currentUser.address || '',
+                bio: currentUser.bio || ''
+            })
+        }
+    }, [currentUser])
+
     let imageSource = getUserImageSrc(user?.image)
+
+    const doSubmit = async () => {
+        let userData = {...user}
+        let {name, phoneNumber, address, image, bio} = userData
+        if(!name || !phoneNumber || !address || !bio) {
+            Alert.alert('Profile', 'Please fill all the fields')
+            return
+        }
+        setLoading(true);
+
+        try {
+        const res = await updateUser(currentUser?.id, user);
+
+        if (res?.success) {
+            setUserData({ ...currentUser, ...user });
+            router.replace('/(main)/profile');
+            } else {
+            Alert.alert('Profile', 'Failed to update profile. Please try again.');
+            console.log('Update error:', res);
+            }
+        } catch (err) {
+            Alert.alert('Profile', 'Something went wrong.');
+            console.error('UpdateUser error:', err);
+        } finally {
+            setLoading(false);
+        }
+    }
 
   return (
     <ScreenWrapper bg='white'>
         <View style={styles.container}>
-            <ScrollView style={{flex: 1}}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}
+            >
+                <ScrollView style={{flex: 1}}>
                 <Header
                     title='Edit Profile'
                     showBackButton={false}
@@ -44,31 +93,42 @@ const EditProfile = () => {
                         <Input
                             icon={<Icon name='user' />}
                             placeholder= 'Enter your name'
-                            value={null}
-                            onChangeText={value=> {}}
+                            value={user?.name}
+                            onChangeText={value=> setUser({...user, name: value})}
                         />
                         <Input
                             icon={<Icon name='call' />}
                             placeholder= 'Enter your phone number'
-                            value={null}
-                            onChangeText={value=> {}}
+                            keyboardType="phone-pad"
+                            value={user?.phoneNumber}
+                             onChangeText={value=> setUser({...user, phoneNumber: value})}
                         />
                         <Input
                             icon={<Icon name='location' />}
                             placeholder= 'Where do you live?'
-                            value={null}
-                            onChangeText={value=> {}}
+                            value={user?.address}
+                             onChangeText={value=> setUser({...user, address: value})}
                         />
                         <Input
                             placeholder= 'Your bio'
-                            value={null}
-                            onChangeText={value=> {}}
+                            multiline={true}
+                            additionalStyles={styles.bio}
+                            value={user?.bio}
+                             onChangeText={value=> setUser({...user, bio: value})}
+                        />
+
+                        <Button
+                            title="Update"
+                            loading={loading}
+                            onPress={doSubmit}
                         />
                     </View>
                 </View>
 
                 
-            </ScrollView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+            
         </View>
     </ScreenWrapper>
   )
@@ -112,5 +172,10 @@ const styles = StyleSheet.create({
    formHeader: {
     marginBottom: 10,
     fontSize: 18,
+   }, 
+
+   bio: {
+    height: heigthPercentage(15),
+    alignItems: 'flex-start'
    }
-})
+}) 
