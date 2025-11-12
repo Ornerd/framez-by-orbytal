@@ -1,25 +1,26 @@
 import Icon from '@/assets/icons'
+import AvatarDp from '@/components/AvatarDp'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
+import { heigthPercentage } from '@/helpers/common'
 import { useRouter } from 'expo-router'
 import React from 'react'
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 const Home = () => {
 
-    const {setAuth} = useAuth();
+    const {user, setAuth} = useAuth();
     const router = useRouter()
 
-    const doTheLogout = async ()=> {
-       setAuth(null)
-       const {error} = await supabase.auth.signOut()
-       error && Alert.alert('Error signing out')
-    }
+    // const doTheLogout = async ()=> {
+    //    setAuth(null)
+    //    const {error} = await supabase.auth.signOut()
+    //    error && Alert.alert('Error signing out')
+    // }
 
   return (
-    <ScreenWrapper>
+    <ScreenWrapper bg="white">
         <View style={styles.container}>
             <View style={styles.topMenu}>
                 <Text style={styles.appName}>Framez</Text>
@@ -41,10 +42,11 @@ const Home = () => {
                     </Pressable>
 
                     <Pressable onPress={()=>router.push('/(main)/profile')}>
-                        <Icon
-                        name='user'
-                        size={32}
-                        strokeWidth={1}
+                        <AvatarDp 
+                        uri={user?.image}
+                        size= {heigthPercentage(5.3)}
+                        rounded={50}
+                        style={{borderWidth: 2}}
                         />
                     </Pressable>
                 </View>

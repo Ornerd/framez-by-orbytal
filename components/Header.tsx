@@ -44,7 +44,8 @@ const styles = StyleSheet.create({
 
     title: {
         fontSize: 24,
-        fontWeight: theme.fonts.semiBold
+        fontWeight: theme.fonts.semiBold,
+        color: theme.colors.text
     },
     
     showBackButton: {
