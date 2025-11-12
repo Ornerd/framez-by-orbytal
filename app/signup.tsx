@@ -7,7 +7,7 @@ import { theme } from '@/constants/theme'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
-import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native'
 
 const Signup = () => {
 
@@ -79,7 +79,12 @@ const Signup = () => {
   return (
     <ScreenWrapper bg='white'>
       <StatusBar barStyle="light-content" />
-        <View style={styles.container}>
+       <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+        >
+          <ScrollView style={{flex: 1}}>
+            <View style={styles.container}>
           <BackButton router={router}/>
             
             <View style={styles.textContainer}>
@@ -135,7 +140,10 @@ const Signup = () => {
               </Pressable>
             </View>
   
-        </View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+        
     </ScreenWrapper>
    
   )
