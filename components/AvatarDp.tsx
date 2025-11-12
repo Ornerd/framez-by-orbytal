@@ -9,7 +9,7 @@ const AvatarDp = ({ uri,
     size= heigthPercentage(4.5),
     rounded= theme.radius.md,
     style={}
-}) => { 
+}:{uri: string, size: number, rounded: number, style?: any}) => { 
 
   return (
     <Image 

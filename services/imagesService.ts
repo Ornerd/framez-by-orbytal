@@ -1,4 +1,4 @@
-export const getUserImageSrc = imagePath => {
+export const getUserImageSrc = (imagePath) => {
     if(imagePath) {
         return {uri: imagePath}
     }else{

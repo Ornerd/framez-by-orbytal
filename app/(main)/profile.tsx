@@ -47,7 +47,7 @@ const Profile = () => {
   )
 }
 
-const UserHeader = ({user, router, doTheLogout}) => {
+const UserHeader = ({user, router, doTheLogout}: {user: any, router: any, doTheLogout:()=>void}) => {
     return (
       <View style={{flex:1, backgroundColor:'white', paddingHorizontal: 24, position: 'relative'}}>
         <Header title="Profile" showBackButton={true}/>
