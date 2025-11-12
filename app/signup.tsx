@@ -4,6 +4,7 @@ import Button from '@/components/Button'
 import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
+import { supabase } from '@/lib/supabase'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
 import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
@@ -24,24 +25,56 @@ const Signup = () => {
   }
 
   const onSubmit = async () => {
-    let newErrors = { name: '', email: '', password: '' }
+    let newErrors = { name: '', email: '', password: '' };
+    let isValid = true; 
 
     if (!nameRef.current.trim()) {
-      newErrors.name = 'Please enter your name'
+        newErrors.name = 'Please enter your name';
+        isValid = false;
     }
 
     if (!emailRef.current.trim()) {
-      newErrors.email = 'Please enter your email address'
-    }else if (!isValidEmail(emailRef.current.trim())) {
-      newErrors.email = 'Please enter a valid email address'
+        newErrors.email = 'Please enter your email address';
+        isValid = false;
+    } else if (!isValidEmail(emailRef.current.trim())) {
+        newErrors.email = 'Please enter a valid email address';
+        isValid = false; 
     }
 
     if (!passwordRef.current.trim()) {
-      newErrors.password = 'Please enter your password'
+        newErrors.password = 'Please enter your password';
+        isValid = false; 
+    } else if (passwordRef.current.trim().length < 6) {
+        newErrors.password = 'Password must be atleast 6 characters';
+        isValid = false; 
     }
 
-    setErrors(newErrors)
-  }
+    setErrors(newErrors);
+
+    if (!isValid) {
+        return; 
+    }
+
+    // Only if 'isValid' is true, continue with API call and loading state
+    let name = nameRef.current.trim();
+    let email = emailRef.current.trim();
+    let password = passwordRef.current.trim();
+
+    setLoading(true); 
+
+    const { data: { session }, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+            data: {
+                name
+            }
+        }
+    });
+
+    setLoading(false); 
+};
+
 
   return (
     <ScreenWrapper bg='white'>
