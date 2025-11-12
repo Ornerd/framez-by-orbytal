@@ -1,4 +1,4 @@
-import BackButton from '@/components/BackButton'
+import Header from '@/components/Header'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'expo-router'
@@ -11,16 +11,21 @@ const Profile = () => {
     const router = useRouter()
 
   return (
-    <ScreenWrapper>
-      <View>
-        <View>
-            <BackButton
+    <ScreenWrapper bg='white'>
+        <UserHeader
+            user={user}
             router={router}
-            />
-        </View>
-      </View>
+        />
     </ScreenWrapper>
   )
+}
+
+const UserHeader = ({user, router}) => {
+    return (
+      <View style={{flex:1, backgroundColor:'white', paddingHorizontal: 24}}>
+        <Header title="Profile" showBackButton={true}/>
+      </View>
+    )
 }
 
 export default Profile
