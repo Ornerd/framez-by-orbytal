@@ -4,9 +4,10 @@ import Button from '@/components/Button'
 import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
+import { supabase } from '@/lib/supabase'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
-import { Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
+import { Alert, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native'
 
 const Login = () => {
 
@@ -24,18 +25,42 @@ const Login = () => {
 
   const onSubmit = async () => {
     let newErrors = { email: '', password: '' }
+    let isValid = true; 
 
     if (!emailRef.current.trim()) {
       newErrors.email = 'Please enter your email address'
+      isValid = false;
     }else if (!isValidEmail(emailRef.current.trim())) {
       newErrors.email = 'Please enter a valid email address'
+      isValid = false;
     }
 
     if (!passwordRef.current.trim()) {
       newErrors.password = 'Please enter your password'
+      isValid = false;
     }
 
     setErrors(newErrors)
+
+     if (!isValid) {
+        return; 
+    }
+
+     let email = emailRef.current.trim();
+     let password = passwordRef.current.trim();
+
+     setLoading(true); 
+
+     const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if(error) {
+        Alert.alert('Login error:', error.message)
+      }
+
+     setLoading(false); 
   }
 
   return (
