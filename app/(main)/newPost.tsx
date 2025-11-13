@@ -8,6 +8,7 @@ import { theme } from '@/constants/theme'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
 import { getSupabaseFileUrl } from '@/services/imagesService'
+import { Video } from 'expo-av'
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
@@ -123,7 +124,15 @@ const NewPost = () => {
                     <View style={styles.file}>
                       {
                         getFileType(file) == 'video'? (
-                            <></>
+                            <Video
+                            style={{flex: 1}}
+                            source={{
+                              uri: getFileUri(file)
+                            }}
+                            useNativeControls
+                            resizeMode='cover'
+                            isLooping
+                            />
                         ): (
                             <Image source={{uri: getFileUri(file)}}
                             resizeMode='cover'
