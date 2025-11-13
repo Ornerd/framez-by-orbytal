@@ -1,11 +1,13 @@
 import Icon from '@/assets/icons'
 import AvatarDp from '@/components/AvatarDp'
+import Button from '@/components/Button'
 import Header from '@/components/Header'
 import RichTextEditor from '@/components/RichTextEditor'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
+import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -21,6 +23,43 @@ const NewPost = () => {
 
 
   const onPick = async(isImage)=> {
+    let mediaConfig ={
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.5,
+    }
+    if(!isImage) {
+      mediaConfig = {
+        mediaTypes: ['videos'],
+        allowsEditing: true,
+      }
+    }
+    let result = await ImagePicker.launchImageLibraryAsync(mediaConfig);
+
+    if(!result.canceled) {
+      setFile(result.assets[0])
+    }
+
+  }
+
+  const isLocalFile = (file) => {
+    if(!file) return null
+    if(typeof file == 'object') return true
+
+    return false
+  }
+
+  const getFileType = (file) => {
+    if(!file) return null
+    if(isLocalFile(file)) {
+      return file.type
+    }
+
+    //a small check for remote file
+  }
+
+  const doSubmit = async () => {
 
   }
 
@@ -63,6 +102,20 @@ const NewPost = () => {
                         onChange={body => bodyRef.current = body}
                         />
                 </View>
+
+                {
+                  file && (
+                    <View style={styles.file}>
+                      {
+                        getFileType(file) == 'video'? (
+                            <></>
+                        ): (
+                            <></>
+                        )
+                      }
+                    </View>
+                  )
+                }
                 <View style={styles.media}>
                         <Text style={styles.addImageText}>Insert:</Text>
                         <View style={styles.mediaIcons}>
@@ -76,7 +129,7 @@ const NewPost = () => {
                           <TouchableOpacity onPress={()=>onPick(false)}>
                             <Icon
                               name='video'
-                              size={30}
+                              size={33}
                               color={theme.colors.dark}
                             />
                           </TouchableOpacity>
@@ -84,6 +137,13 @@ const NewPost = () => {
                 </View>
 
               </ScrollView>
+
+              <Button
+              buttonStyle={{paddingVertical: 10}}
+              title='Post'
+              loading={loading}
+              onPress={doSubmit}
+              />
           </View>
         
       </KeyboardAvoidingView>
@@ -132,5 +192,11 @@ const styles = StyleSheet.create({
   },
   addImageText: {
 
+  },
+  file: {
+    height: heigthPercentage(30),
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: theme.radius.xl,
   }
 })
