@@ -28,7 +28,19 @@ const EditProfile = () => {
         address: ''
     })
 
-    const pickImage = async ()=> {
+    useEffect(()=> {
+        if(currentUser) {
+            setUser({
+                name: currentUser.name || '',
+                phoneNumber: currentUser.phoneNumber || '',
+                image: currentUser.image || null,
+                address: currentUser.address || '',
+                bio: currentUser.bio || ''
+            })
+        }
+    }, [currentUser])
+
+     const pickImage = async ()=> {
           // No permissions request is necessary for launching the image library
         let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
@@ -42,18 +54,6 @@ const EditProfile = () => {
         setUser({...user, image:result.assets[0]});
         }
     }
-
-    useEffect(()=> {
-        if(currentUser) {
-            setUser({
-                name: currentUser.name || '',
-                phoneNumber: currentUser.phoneNumber || '',
-                image: currentUser.image || null,
-                address: currentUser.address || '',
-                bio: currentUser.bio || ''
-            })
-        }
-    }, [currentUser])
 
     const doSubmit = async () => {
         let userData = {...user}
