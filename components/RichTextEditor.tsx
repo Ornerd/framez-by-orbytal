@@ -1,14 +1,13 @@
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
-import { actions, RichEditor, RichToolbar } from 'react-native-pell-rich-editor'
+import { actions, RichToolbar } from 'react-native-pell-rich-editor'
 
 const RichTextEditor = ({editorRef, onChange}) => {
   return (
     <View style={{minHeight: 285}}>
       <RichToolbar
-      editor={RichEditor}
         actions={[
-          actions.setBold,
+          actions.setBold, 
           actions.setItalic,
           actions.setUnderline,
           actions.insertBulletsList,
@@ -25,11 +24,20 @@ const RichTextEditor = ({editorRef, onChange}) => {
           actions.redo,
         ]}
         selectedIconTint="#2095F2"
-        iconTint="#000000"/>
+        iconTint="#000000"
+        style={styles.richBar}
+        flatContainerStyle={styles.listStyle}
+        editor={editorRef}
+        disabled={false}
+        />
     </View>
   )
 }
 
 export default RichTextEditor
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    richBar: {
+
+    }
+})
