@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(prev => ({ ...prev, ...userData }));
   };
 
-  // 🧠 Rehydrate user from Supabase on startup
+  // Rehydrate user from Supabase on startup
   useEffect(() => {
     const loadUser = async () => {
       setLoading(true);
