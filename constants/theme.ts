@@ -2,8 +2,8 @@ import { TextStyle } from "react-native";
 
 export const theme = {
     colors: {
-        primary: '#00C26F',
-        primaryDark: '#00AC62',
+        primary: '#0a0049ff',
+        primaryDark: '#010514ff',
         dark: '#3E3E3E',
         darkLight: '#E1E1E1',
         gray: '#E3E3E3',

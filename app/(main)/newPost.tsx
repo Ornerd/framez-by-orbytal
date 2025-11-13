@@ -8,11 +8,12 @@ import { theme } from '@/constants/theme'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
 import { getSupabaseFileUrl } from '@/services/imagesService'
+import { createOrUpdatePost } from '@/services/postService'
 import { Video } from 'expo-av'
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
-import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const NewPost = () => {
 
@@ -59,7 +60,7 @@ const NewPost = () => {
     }
 
     //a small check for remote file
-    if(file.includes('postImage')){
+    if(file.includes('postImages')){
       return 'image'
     }
 
@@ -76,7 +77,30 @@ const NewPost = () => {
   }
 
   const doSubmit = async () => {
+    if(!bodyRef.current &&  !file) {
+      Alert.alert('Post', 'please add some media and tell us how you feel today')
+        return;
+    }
 
+    let data = {
+      file,
+      body: bodyRef.current,
+      userId: user?.id,
+    }
+
+    //create post
+    setLoading(true)
+    let res = await createOrUpdatePost(data)
+    setLoading(false)
+    if(res.success) {
+      setFile(null);
+      bodyRef.current = '',
+      editorRef.current?.setContentHTML('')
+      router.back();
+      
+    }else{
+      Alert.alert('Post', res.msg)
+    }
   }
 
   return (
