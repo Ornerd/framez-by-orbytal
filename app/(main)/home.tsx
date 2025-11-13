@@ -1,17 +1,36 @@
 import Icon from '@/assets/icons'
 import AvatarDp from '@/components/AvatarDp'
+import PostCard from '@/components/PostCard'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
+import { fetchPosts } from '@/services/postService'
 import { useRouter } from 'expo-router'
-import React from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 
+
+var limit=0;
 const Home = () => {
 
     const {user, setAuth} = useAuth();
     const router = useRouter()
+
+    const [posts, setPosts] = useState([])
+
+    useEffect(()=> {
+        getPosts()
+    }, [])
+
+    const getPosts = async () => {
+        //call the api
+        limit = limit + 10
+        let res = await fetchPosts();
+        if (res.success){
+            setPosts(res.data)
+        }
+    }
 
     // const doTheLogout = async ()=> {
     //    setAuth(null)
@@ -52,6 +71,21 @@ const Home = () => {
                 </View>
             </View>
             
+            {/* the posts */}
+            <FlatList
+            data={posts} 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listStyle} 
+            keyExtractor={item=> item.id.toString()}
+            renderItem={({item})=> <PostCard
+                item={item}
+                cureentUser={user}
+                router={router}
+                />
+            }          
+            >
+
+            </FlatList>
         </View>
     </ScreenWrapper>
     
@@ -85,5 +119,10 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         justifyContent: 'flex-end'
 
+    }, 
+
+    listStyle: {
+        paddingTop: 20,
+        paddingHorizontal: 24
     }
 })
