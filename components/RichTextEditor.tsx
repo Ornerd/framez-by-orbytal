@@ -63,5 +63,13 @@ const styles = StyleSheet.create({
         borderBottomRightRadius: theme.radius.xl,
         borderBottomLeftRadius: theme.radius.xl,
         padding: 7
+    }, 
+
+    contentStyle : {
+        color: theme.colors.textDark,
+    },
+
+    listStyle: {
+        paddingHorizontal: 20,
     }
 })
