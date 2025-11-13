@@ -1,51 +1,96 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { supabase } from "@/lib/supabase"; // adjust this import to your project path
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
-// 1. Define the type for the user object (adjust properties as needed)
 interface User {
-    [key: string]: any;
-    // Add other user properties here
+  id: string;
+  email?: string;
+  name?: string;
+  phoneNumber?: string;
+  address?: string;
+  bio?: string;
+  image?: string;
+  [key: string]: any;
 }
 
-// 2. Define the type for the entire context value
 interface AuthContextType {
-    user: User | null;
-    setAuth: (authUser: User | null) => void;
-    setUserData: (userData: User) => void;
+  user: User | null;
+  setAuth: (authUser: User | null) => void;
+  setUserData: (userData: User) => void;
+  loading: boolean;
 }
 
-// 3. Create the context with an explicit type and a default value of `undefined`
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 4. Define the type for the AuthProvider props, including children
 interface AuthProviderProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    // 5. Explicitly type the state
-    const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    const setAuth = (authUser: User | null) => {
-        setUser(authUser);
-    }
+  const setAuth = (authUser: User | null) => {
+    setUser(authUser);
+  };
 
-    const setUserData = (userData: User) => {
-        setUser({ ...userData });
-    }
+  const setUserData = (userData: User) => {
+    setUser(prev => ({ ...prev, ...userData }));
+  };
 
-    return (
-        // 6. Ensure the value prop matches AuthContextType
-        <AuthContext.Provider value={{ user, setAuth, setUserData }}>
-            {children}
-        </AuthContext.Provider>
-    );
-}
+  // 🧠 Rehydrate user from Supabase on startup
+  useEffect(() => {
+    const loadUser = async () => {
+      setLoading(true);
 
-// 7. Create a custom hook to use the context with a null check
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const { data: profile, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!error && profile) {
+          setUser({ ...session.user, ...profile, id: session.user.id, email: session.user.email});
+        } else {
+          // fallback to session data if no profile row found
+          setUser(session.user);
+        }
+      }
+
+      setLoading(false);
+    };
+
+    loadUser();
+
+    // 🔄 Optional: subscribe to auth changes (login/logout)
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+      } else {
+        setUser(null);
+      }
+    });
+
+    return () => {
+      subscription.subscription.unsubscribe();
+    };
+  }, []);
+
+  return (
+    <AuthContext.Provider value={{ user, setAuth, setUserData, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };
