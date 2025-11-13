@@ -7,10 +7,11 @@ import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
+import { getSupabaseFileUrl } from '@/services/imagesService'
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const NewPost = () => {
 
@@ -57,6 +58,20 @@ const NewPost = () => {
     }
 
     //a small check for remote file
+    if(file.includes('postImage')){
+      return 'image'
+    }
+
+    return 'video'
+  }
+
+  const getFileUri = (file)=> {
+      if(!file) return null
+      if(isLocalFile(file)) {
+        return file.uri
+      }
+
+      return getSupabaseFileUrl(file)?.uri
   }
 
   const doSubmit = async () => {
@@ -110,9 +125,19 @@ const NewPost = () => {
                         getFileType(file) == 'video'? (
                             <></>
                         ): (
-                            <></>
+                            <Image source={{uri: getFileUri(file)}}
+                            resizeMode='cover'
+                            style={{flex: 1}}
+                            />
                         )
                       }
+                      <Pressable style={styles.closeIcon} onPress={()=>setFile(null)}>
+                        <Icon
+                        name='delete'
+                        size={25}
+                        color='white' 
+                        />
+                      </Pressable>
                     </View>
                   )
                 }
@@ -198,5 +223,14 @@ const styles = StyleSheet.create({
     width: '100%',
     overflow: 'hidden',
     borderRadius: theme.radius.xl,
+    marginTop: 20
+  },
+  closeIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 7,
+    backgroundColor: 'rgba(255, 0, 0, 0.6)',
+    borderRadius: 50
   }
 })
