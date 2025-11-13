@@ -1,9 +1,16 @@
+import AvatarDp from '@/components/AvatarDp'
 import Header from '@/components/Header'
 import ScreenWrapper from '@/components/ScreenWrapper'
+import { theme } from '@/constants/theme'
+import { useAuth } from '@/contexts/AuthContext'
+import { heigthPercentage } from '@/helpers/common'
 import React from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 const NewPost = () => {
+
+  const {user} = useAuth();
+
   return (
     <ScreenWrapper bg='white'> 
       <KeyboardAvoidingView
@@ -17,8 +24,23 @@ const NewPost = () => {
                   showBackButton={true}
               />
 
-              <ScrollView style={{flex: 1}}>
-                
+              <ScrollView style={{flex: 1, gap: 20}}>
+
+                <View style={styles.header}>
+                  <AvatarDp
+                  uri={user?.image}
+                  size={heigthPercentage(6.5)}
+                  rounded={theme.radius.xl}
+                  />
+                  <View style={{gap:2}}>
+                    <Text style={styles.username}>
+                        {
+                          user && user.name
+                        }
+                    </Text>
+                  </View>
+                </View>
+
               </ScrollView>
           </View>
         
@@ -33,5 +55,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
+  }, 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: '12'
   }
 })
