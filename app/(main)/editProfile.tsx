@@ -5,9 +5,10 @@ import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
-import { getUserImageSrc } from '@/services/imagesService'
+import { getUserImageSrc, uploadFile } from '@/services/imagesService'
 import { updateUser } from '@/services/userService'
 import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -27,8 +28,19 @@ const EditProfile = () => {
         address: ''
     })
 
-    const pickImage = ()=> {
-        
+    const pickImage = async ()=> {
+          // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.5,
+        });
+
+
+        if (!result.canceled) {
+        setUser({...user, image: result.assets[0]});
+        }
     }
 
     useEffect(()=> {
@@ -43,22 +55,28 @@ const EditProfile = () => {
         }
     }, [currentUser])
 
-    let imageSource = getUserImageSrc(user?.image)
-
     const doSubmit = async () => {
         let userData = {...user}
         let {name, phoneNumber, address, image, bio} = userData
-        if(!name || !phoneNumber || !address || !bio) {
+        if(!name || !phoneNumber || !address || !bio || !image) {
             Alert.alert('Profile', 'Please fill all the fields')
             return
         }
         setLoading(true);
 
+        if(typeof image=='object') {
+            let imageRes = await uploadFile('profiles', image?.uri, true)
+            if(imageRes.success) {
+                userData.image = imageRes.data;
+            }
+            else userData.image = null;
+        }
+
         try {
         const res = await updateUser(currentUser?.id, user);
 
         if (res?.success) {
-            setUserData({ ...currentUser, ...user });
+            setUserData({ ...currentUser, ...user});
             router.replace('/(main)/profile');
             } else {
             Alert.alert('Profile', 'Failed to update profile. Please try again.');
@@ -71,6 +89,8 @@ const EditProfile = () => {
             setLoading(false);
         }
     }
+
+     let imageSource = user.image && typeof user.image =='object'? user.image.uri : getUserImageSrc(user.image)
 
   return (
     <ScreenWrapper bg='white'>
@@ -163,6 +183,7 @@ const styles = StyleSheet.create({
     height: heigthPercentage(14),
     alignSelf: 'center',
     alignItems: 'center',
+    borderRadius: 12
    },
 
    avatarIcon: {
