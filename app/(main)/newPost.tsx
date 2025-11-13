@@ -1,3 +1,4 @@
+import Icon from '@/assets/icons'
 import AvatarDp from '@/components/AvatarDp'
 import Header from '@/components/Header'
 import RichTextEditor from '@/components/RichTextEditor'
@@ -7,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const NewPost = () => {
 
@@ -17,6 +18,11 @@ const NewPost = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false)
   const [file, setFile] = useState(file)
+
+
+  const onPick = async(isImage)=> {
+
+  }
 
   return (
     <ScreenWrapper bg='white'> 
@@ -58,7 +64,23 @@ const NewPost = () => {
                         />
                 </View>
                 <View style={styles.media}>
-
+                        <Text style={styles.addImageText}>Insert:</Text>
+                        <View style={styles.mediaIcons}>
+                          <TouchableOpacity onPress={()=>onPick(true)}>
+                            <Icon
+                              name='image'
+                              size={30}
+                              color={theme.colors.dark}
+                            />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={()=>onPick(false)}>
+                            <Icon
+                              name='video'
+                              size={30}
+                              color={theme.colors.dark}
+                            />
+                          </TouchableOpacity>
+                        </View>
                 </View>
 
               </ScrollView>
