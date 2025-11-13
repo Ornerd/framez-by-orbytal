@@ -1,6 +1,7 @@
+import { theme } from '@/constants/theme'
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
-import { actions, RichToolbar } from 'react-native-pell-rich-editor'
+import { StyleSheet, Text, View } from 'react-native'
+import { actions, RichEditor, RichToolbar } from 'react-native-pell-rich-editor'
 
 const RichTextEditor = ({editorRef, onChange}) => {
   return (
@@ -23,12 +24,23 @@ const RichTextEditor = ({editorRef, onChange}) => {
           actions.undo,
           actions.redo,
         ]}
-        selectedIconTint="#2095F2"
-        iconTint="#000000"
+        iconMap={{
+            [actions.heading4]: ({tintColor}) => <Text style={{color:tintColor}}>H4</Text>
+        }}
+        selectedIconTint={theme.colors.primary}
+        iconTint={theme.colors.primaryDark}
         style={styles.richBar}
         flatContainerStyle={styles.listStyle}
         editor={editorRef}
         disabled={false}
+        />
+
+        <RichEditor
+        ref={editorRef}
+        containerStyle={styles.rich}
+        editorStyle={styles.contentStyle}
+        placeholder="What's going on in your mind?"
+        onChange={onChange}
         />
     </View>
   )
@@ -38,6 +50,18 @@ export default RichTextEditor
 
 const styles = StyleSheet.create({
     richBar: {
-
+        borderTopRightRadius: theme.radius.xl, 
+        borderTopLeftRadius: theme.radius.xl, 
+        backgroundColor: theme.colors.gray
+    },
+    rich: {
+        minHeight: 250,
+        flex: 1,
+        borderWidth: 1,
+        borderTopWidth: 0,
+        borderColor: theme.colors.gray,
+        borderBottomRightRadius: theme.radius.xl,
+        borderBottomLeftRadius: theme.radius.xl,
+        padding: 7
     }
 })
