@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-export const getUserData = async (userId: string)=> {
+export const getUserData = async (userId: any)=> {
     try {
         const { data, error } = await supabase
         .from('users')
@@ -18,7 +18,7 @@ export const getUserData = async (userId: string)=> {
         return {success: false, msg: error&& error.message}
     }
 }
-export const updateUser = async (userId: string, data: any)=> {
+export const updateUser = async (userId: any, data: any)=> {
     try {
         const { error } = await supabase
         .from('users')

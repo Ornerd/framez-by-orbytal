@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           .single();
 
         if (!error && profile) {
-          setUser({ ...session.user, ...profile, id: session.user.id, email: session.user.email});
+          setUser({ ...session.user, ...profile });
         } else {
           // fallback to session data if no profile row found
           setUser(session.user);

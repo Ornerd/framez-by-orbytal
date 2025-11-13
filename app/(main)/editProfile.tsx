@@ -39,7 +39,7 @@ const EditProfile = () => {
 
 
         if (!result.canceled) {
-        setUser({...user, image: result.assets[0]});
+        setUser({...user, image:result.assets[0]});
         }
     }
 
@@ -73,11 +73,11 @@ const EditProfile = () => {
         }
 
         try {
-        const res = await updateUser(currentUser?.id, user);
+        const res = await updateUser(currentUser?.id, userData);
 
         if (res?.success) {
-            setUserData({ ...currentUser, ...user});
-            router.replace('/(main)/profile');
+            setUserData({ ...currentUser, ...userData});
+            router.back();
             } else {
             Alert.alert('Profile', 'Failed to update profile. Please try again.');
             console.log('Update error:', res);
