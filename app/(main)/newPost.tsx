@@ -5,13 +5,18 @@ import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
 import { useAuth } from '@/contexts/AuthContext'
 import { heigthPercentage } from '@/helpers/common'
-import React, { useRef } from 'react'
+import { useRouter } from 'expo-router'
+import React, { useRef, useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 const NewPost = () => {
 
   const {user} = useAuth();
-  const bodyRef = useRef('')
+  const bodyRef = useRef('');
+  const editorRef = useRef(null);
+  const router = useRouter();
+  const [loading, setLoading] = useState(false)
+  const [file, setFile] = useState(file)
 
   return (
     <ScreenWrapper bg='white'> 
@@ -47,7 +52,10 @@ const NewPost = () => {
                 </View>
 
                 <View style={styles.textEditor}>
-                        <RichTextEditor/>
+                        <RichTextEditor
+                        editorRef={editorRef}
+                        onChange={body => bodyRef.current = body}
+                        />
                 </View>
 
               </ScrollView>
