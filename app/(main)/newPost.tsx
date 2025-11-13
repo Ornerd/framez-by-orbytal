@@ -57,6 +57,9 @@ const NewPost = () => {
                         onChange={body => bodyRef.current = body}
                         />
                 </View>
+                <View style={styles.media}>
+
+                </View>
 
               </ScrollView>
           </View>
@@ -88,5 +91,24 @@ const styles = StyleSheet.create({
   },
   textEditor: {
     marginTop: 20
+  },
+  media: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    padding: 12,
+    paddingHorizontal: 18,
+    borderRadius: theme.radius.xl,
+    borderColor: theme.colors.gray,
+     marginTop: 20,
+  },
+  mediaIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+  },
+  addImageText: {
+
   }
 })
