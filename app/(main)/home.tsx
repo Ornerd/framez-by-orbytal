@@ -79,7 +79,7 @@ const Home = () => {
             keyExtractor={item=> item.id.toString()}
             renderItem={({item})=> <PostCard
                 item={item}
-                cureentUser={user}
+                currentUser={user}
                 router={router}
                 />
             }          
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     }, 
 
     listStyle: {
-        paddingTop: 20,
-        paddingHorizontal: 24
+        paddingTop: 40,
+        // paddingHorizontal: 24
     }
 })
