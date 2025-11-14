@@ -1,11 +1,24 @@
-import { supabaseAnonKey, supabaseUrl } from '@/constants'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { createClient, processLock } from '@supabase/supabase-js'
-import { AppState, Platform } from 'react-native'
-import 'react-native-url-polyfill/auto'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient, processLock } from '@supabase/supabase-js';
+import Constants from "expo-constants";
+import { AppState, Platform } from 'react-native';
+import 'react-native-url-polyfill/auto';
+
+type ExtraConfig = {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
+};
+
+const extra = (Constants.expoConfig?.extra ?? {}) as Partial<ExtraConfig>;
+
+if (!extra.supabaseUrl || !extra.supabaseAnonKey) {
+  throw new Error(
+    "Supabase keys are missing. Make sure supabaseUrl and supabaseAnonKey exist in app.config.js under expo.extra"
+  );
+}
 
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(extra.supabaseUrl, extra.supabaseAnonKey, {
   auth: {
     ...(Platform.OS !== "web" ? { storage: AsyncStorage } : {}),
     autoRefreshToken: true,
