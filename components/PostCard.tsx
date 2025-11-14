@@ -18,6 +18,8 @@ type PostCardProps = {
 
 const PostCard = ({item, currentUser, router}: PostCardProps) => {
     const createdAt = moment(item?.created_at).fromNow()
+    const likes = []
+    const likedPost = false
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -44,13 +46,13 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
       <View style={styles.content}>
         <View style={styles.postBody}>
             <Text>{
-            item?.body && (
-                <RenderHtml
-                contentWidth={widthPercentage(100)}
-                    source={{html: item?.body}}
-                />
+                item?.body && (
+                    <RenderHtml
+                    contentWidth={widthPercentage(100)}
+                        source={{html: item?.body}}
+                    />
 
-            )
+                )
             }</Text>
         </View>
         {
@@ -69,11 +71,40 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
             item?.file && item?.file?.includes('postVideos') && (
                 <Video
                 style={[styles.postMedia, {height: heigthPercentage(30)}]}
+                source={getSupabaseFileUrl(item?.file)}
+                useNativeControls
+                resizeMode ='cover'
+                isLooping
                 />
             )
         }
 
       </View>
+      <View style={styles.footer}>
+        <View style={styles.footerButton}>
+            <TouchableOpacity>
+                <Icon name='heart' size={30}
+                color={likedPost? theme.colors.rose : theme.colors.textLight}
+                fill={likedPost? theme.colors.rose : 'transparent'}/>
+            </TouchableOpacity>
+            <Text style={styles.count}>
+                {
+                    likes?.length
+                }
+            </Text>
+        </View>
+        <View style={styles.footerButton}>
+            <TouchableOpacity>
+                <Icon name='comment' size={30} color={theme.colors.textLight}/>
+            </TouchableOpacity>
+            <Text style={styles.count}>
+                {
+                    0
+                }
+            </Text>
+        </View>
+      </View>
+
     </View>
   )
 }
@@ -83,13 +114,13 @@ export default PostCard
 const styles = StyleSheet.create({
     container: {
         gap: 10,
-        marginBottom: 15,
+        marginBottom: 35,
         borderRadius: theme.radius.xxl*1.1,
         padding: 10,
         paddingVertical: 12,
         backgroundColor: 'white',
         borderWidth: 0.5,
-        borderColor: theme.colors.gray
+        borderColor: theme.colors.gray,
     },
     header: {
         flexDirection: 'row',
@@ -108,11 +139,13 @@ const styles = StyleSheet.create({
         height: heigthPercentage(40),
         width: "100%",
         borderRadius: theme.radius.xl,
+        marginTop: 20
     },
     footer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 15
+        gap: 15,
+        marginTop: 10
     },
     content: {
 
@@ -125,5 +158,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 4
-    }
+    },
+    count: {
+
+    },
 })

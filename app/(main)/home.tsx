@@ -1,5 +1,6 @@
 import Icon from '@/assets/icons'
 import AvatarDp from '@/components/AvatarDp'
+import Loading from '@/components/Loading'
 import PostCard from '@/components/PostCard'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
@@ -82,10 +83,13 @@ const Home = () => {
                 currentUser={user}
                 router={router}
                 />
-            }          
-            >
-
-            </FlatList>
+            } 
+            ListFooterComponent={(
+                <View style={{marginVertical: posts.length === 0 ? 200: 30}}>
+                    <Loading/>
+                </View>
+            )}         
+            />
         </View>
     </ScreenWrapper>
     
