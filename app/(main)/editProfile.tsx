@@ -102,7 +102,7 @@ const EditProfile = () => {
                 <ScrollView style={{flex: 1}}>
                 <Header
                     title='Edit Profile'
-                    showBackButton={false}
+                    showBackButton={true}
                 />
 
                 <View style={styles.form}>

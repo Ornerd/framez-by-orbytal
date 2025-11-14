@@ -2,11 +2,12 @@ import Icon from '@/assets/icons'
 import { theme } from '@/constants/theme'
 import { heigthPercentage, widthPercentage } from '@/helpers/common'
 import { getSupabaseFileUrl } from '@/services/imagesService'
+import { createPostLike, removePostLike } from '@/services/postService'
 import { Video } from 'expo-av'
 import { Image } from 'expo-image'
 import moment from 'moment'
-import React from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import RenderHtml from 'react-native-render-html'
 import AvatarDp from './AvatarDp'
 
@@ -18,8 +19,39 @@ type PostCardProps = {
 
 const PostCard = ({item, currentUser, router}: PostCardProps) => {
     const createdAt = moment(item?.created_at).fromNow()
-    const likes = []
-    const likedPost = false
+    const [likes, setLikes] = useState([])
+
+    useEffect(()=> {
+        setLikes(item?.postLikes)
+    }, [])
+
+    const doLike = async ()=> {
+        if(likedPost) {
+            let updatedLikes = likes.filter(like=> like.userId != currentUser?.id)
+             setLikes([...updatedLikes])
+
+             let res = await removePostLike(item?.id, currentUser.id);
+
+             if(!res.success) {
+                Alert.alert('Post', 'something sure went wrong!')
+             }
+
+        }else {
+            let data = {
+            userId: currentUser.id,
+                postId: item?.id
+            }
+            setLikes([...likes, data])
+
+            let res = await createPostLike(data);
+
+            if(!res.success) {
+                Alert.alert('Post', 'something sure went wrong!')
+             }
+
+        }
+        
+    }
 
      const videoSourceUri = getSupabaseFileUrl(item?.file);
 
@@ -27,6 +59,9 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
         if (!videoSourceUri) {
             return null; // or a placeholder/loader component
         }
+
+    const likedPost = likes.filter(like => like.userId == currentUser?.id)[0]? true: false
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -90,7 +125,7 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
       </View>
       <View style={styles.footer}>
         <View style={styles.footerButton}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={doLike}>
                 <Icon name='heart' size={30}
                 color={likedPost? theme.colors.rose : theme.colors.textLight}
                 fill={likedPost? theme.colors.rose : 'transparent'}/>

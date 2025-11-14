@@ -21,6 +21,7 @@ const Home = () => {
     const router = useRouter()
 
     const [posts, setPosts] = useState([])
+    const [hasMorePosts, setHasMorePosts] = useState(true)
 
     const handlePostEvent = async (payload) => {
         if(payload.eventType == 'INSERT' && payload?.new?.id) {
@@ -38,7 +39,7 @@ const Home = () => {
         .on('postgres_changes', {event: '*', schema: 'public', table: 'posts'}, handlePostEvent)
         .subscribe();
 
-        getPosts()
+        // getPosts()
 
         return ()=> {
             supabase.removeChannel(postChannel)
@@ -47,9 +48,14 @@ const Home = () => {
 
     const getPosts = async () => {
         //call the api
-        limit = limit + 10
-        let res = await fetchPosts();
+        if(!hasMorePosts) return null;
+
+        limit = limit + 6
+        let res = await fetchPosts(limit);
         if (res.success){
+            if(posts.length == res.data.length) {
+                setHasMorePosts(false)
+            }
             setPosts(res.data)
         }
     }
@@ -105,9 +111,17 @@ const Home = () => {
                 router={router}
                 />
             } 
-            ListFooterComponent={(
+            onEndReached={()=> {
+                getPosts();
+            }}
+            // onEndReachedThreshold={0}
+            ListFooterComponent={ hasMorePosts? (
                 <View style={{marginVertical: posts.length === 0 ? 200: 30}}>
                     <Loading/>
+                </View>
+            ): (
+                <View style={{marginVertical: 30}}>
+                    <Text style={styles.noPosts}>No more posts for now</Text>
                 </View>
             )}         
             />
@@ -149,5 +163,11 @@ const styles = StyleSheet.create({
     listStyle: {
         paddingTop: 40,
         // paddingHorizontal: 24
+    },
+    
+    noPosts: {
+        fontSize: heigthPercentage(2),
+        textAlign: 'center',
+        color: theme.colors.text
     }
 })
