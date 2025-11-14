@@ -12,205 +12,193 @@ import RenderHtml from 'react-native-render-html'
 import AvatarDp from './AvatarDp'
 
 type PostCardProps = {
-    item: any,
-    currentUser: any,
-    router: any,
-    showMoreIcon: boolean
-}
+  item: any;
+  currentUser: any;
+  router: any;
+  showMoreIcon?: boolean;
+};
 
-const PostCard = ({item, currentUser, router, showMoreIcon=true}: PostCardProps) => {
-    const createdAt = moment(item?.created_at).fromNow()
-    const [likes, setLikes] = useState([])
+const PostCard = ({
+  item,
+  currentUser,
+  router,
+  showMoreIcon = true,
+}: PostCardProps) => {
+  const createdAt: string = moment(item?.created_at).fromNow();
+  const [likes, setLikes] = useState<any[]>([]);
 
-    useEffect(()=> {
-        setLikes(item?.postLikes)
-    }, [])
+  useEffect(() => {
+    setLikes(item?.postLikes ?? []);
+  }, [item]);
 
-    const doLike = async ()=> {
-        if(likedPost) {
-            let updatedLikes = likes.filter(like=> like.userId != currentUser?.id)
-             setLikes([...updatedLikes])
+  const likedPost: boolean = !!likes.find(
+    (like) => like.userId === currentUser?.id
+  );
 
-             let res = await removePostLike(item?.id, currentUser.id);
+  const doLike = async (): Promise<void> => {
+    if (likedPost) {
+      const updatedLikes = likes.filter(
+        (like) => like.userId !== currentUser?.id
+      );
+      setLikes([...updatedLikes]);
 
-             if(!res.success) {
-                Alert.alert('Post', 'something sure went wrong!')
-             }
+      const res: any = await removePostLike(item?.id, currentUser?.id);
 
-        }else {
-            let data = {
-            userId: currentUser.id,
-                postId: item?.id
-            }
-            setLikes([...likes, data])
+      if (!res?.success) {
+        Alert.alert('Post', 'something sure went wrong!');
+      }
+    } else {
+      const data: any = {
+        userId: currentUser?.id,
+        postId: item?.id,
+      };
 
-            let res = await createPostLike(data);
+      setLikes([...likes, data]);
 
-            if(!res.success) {
-                Alert.alert('Post', 'something sure went wrong!')
-             }
+      const res: any = await createPostLike(data);
 
-        }
-        
+      if (!res?.success) {
+        Alert.alert('Post', 'something sure went wrong!');
+      }
     }
+  };
 
-     const videoSourceUri = getSupabaseFileUrl(item?.file);
+  const videoSourceUri: string | null = getSupabaseFileUrl(item?.file);
 
-        // Only render the Video component if we have a valid URI string
-        if (!videoSourceUri) {
-            return null; // or a placeholder/loader component
-        }
-
-    const likedPost = likes.filter(like => like.userId == currentUser?.id)[0]? true: false
-
-    const openPostDetails = ()=> {
-        if(!showMoreIcon) return null;
-        router.push({pathname: 'postDetails', params: {postId: item?.id}})
-    }
+  const openPostDetails = (): void => {
+    if (!showMoreIcon) return;
+    router.push({
+      pathname: 'postDetails',
+      params: { postId: item?.id },
+    });
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.userInfo}>
-            <AvatarDp
-                size= {heigthPercentage(4.5)}
-                uri={item?.user?.image}
-                rounded={theme.radius.md}
-            />
-            <View style={{gap: 2}}>
-                <Text style={styles.username}>{item?.user?.name}</Text>
-                <Text>{createdAt}</Text>
-            </View>
+          <AvatarDp
+            size={heigthPercentage(4.5)}
+            uri={item?.user?.image}
+            rounded={theme.radius.md}
+          />
+          <View style={{ gap: 2 }}>
+            <Text style={styles.username}>{item?.user?.name}</Text>
+            <Text>{createdAt}</Text>
+          </View>
         </View>
 
-            {showMoreIcon && (
-                <TouchableOpacity onPress={openPostDetails}>
-                    <Icon
-                    name='threeDotsHorizontal'
-                    size={heigthPercentage(3.4)}
-                    />
-                </TouchableOpacity>
-            )}
+        {showMoreIcon && (
+          <TouchableOpacity onPress={openPostDetails}>
+            <Icon name="threeDotsHorizontal" size={heigthPercentage(3.4)} />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.content}>
         <View style={styles.postBody}>
-            <Text>{
-                item?.body && (
-                    <RenderHtml
-                    contentWidth={widthPercentage(100)}
-                        source={{html: item?.body}}
-                    />
-
-                )
-            }</Text>
+          <Text>
+            {item?.body && (
+              <RenderHtml
+                contentWidth={widthPercentage(100)}
+                source={{ html: item?.body }}
+              />
+            )}
+          </Text>
         </View>
-        {
-            item?.file && item?.file.includes('postImages') && (
-                <Image
-                source={getSupabaseFileUrl(item?.file)}
-                transition={100}
-                style={styles.postMedia}
-                contentFit='cover'
-                />
 
-            )
-        }
-        
-        {/* if file is a video */}
-        {
-            item?.file && item?.file?.includes('postVideos') && (
-                <Video
-                style={[styles.postMedia, {height: heigthPercentage(30)}]}
-                source={{ uri: videoSourceUri }}
-                useNativeControls
-                resizeMode ='cover'
-                isLooping
-                />
-            )
-        }
+        {item?.file && item.file.includes('postImages') && (
+          <Image
+            source={getSupabaseFileUrl(item.file)}
+            transition={100}
+            style={styles.postMedia}
+            contentFit="cover"
+          />
+        )}
 
+        {item?.file && item.file.includes('postVideos') && videoSourceUri && (
+          <Video
+            style={[styles.postMedia, { height: heigthPercentage(30) }]}
+            source={{ uri: videoSourceUri }}
+            useNativeControls
+            resizeMode="cover"
+            isLooping
+          />
+        )}
       </View>
+
       <View style={styles.footer}>
         <View style={styles.footerButton}>
-            <TouchableOpacity onPress={doLike}>
-                <Icon name='heart' size={30}
-                color={likedPost? theme.colors.rose : theme.colors.textLight}
-                fill={likedPost? theme.colors.rose : 'transparent'}/>
-            </TouchableOpacity>
-            <Text style={styles.count}>
-                {
-                    likes?.length
-                }
-            </Text>
+          <TouchableOpacity onPress={doLike}>
+            <Icon
+              name="heart"
+              size={30}
+              color={likedPost ? theme.colors.rose : theme.colors.textLight}
+              fill={likedPost ? theme.colors.rose : 'transparent'}
+            />
+          </TouchableOpacity>
+          <Text style={styles.count}>{likes?.length}</Text>
         </View>
+
         <View style={styles.footerButton}>
-            <TouchableOpacity onPress={openPostDetails}>
-                <Icon name='comment' size={30} color={theme.colors.textLight}/>
-            </TouchableOpacity>
-            <Text style={styles.count}>
-                {
-                    item?.comments[0]?.count
-                }
-            </Text>
+          <TouchableOpacity onPress={openPostDetails}>
+            <Icon name="comment" size={30} color={theme.colors.textLight} />
+          </TouchableOpacity>
+
+          <Text style={styles.count}>
+            {item?.comments?.[0]?.count ?? 0}
+          </Text>
         </View>
       </View>
-
     </View>
-  )
-}
+  );
+};
 
-export default PostCard
+export default PostCard;
 
 const styles = StyleSheet.create({
-    container: {
-        gap: 10,
-        marginBottom: 35,
-        borderRadius: theme.radius.xxl*1.1,
-        padding: 10,
-        paddingVertical: 12,
-        backgroundColor: 'white',
-        borderWidth: 0.5,
-        borderColor: theme.colors.gray,
-    },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    userInfo: {
-        flexDirection: 'row',
-        gap: 12,
-        alignItems: 'center'
-    },
-    username: {
-        fontWeight: theme.fonts.semiBold,
-        fontSize: 16
-    },
-    postMedia: {
-        height: heigthPercentage(40),
-        width: "100%",
-        borderRadius: theme.radius.xl,
-        marginTop: 20
-    },
-    footer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 15,
-        marginTop: 10
-    },
-    content: {
-
-    },
-    postBody: {
-
-    },
-    footerButton: {
-        marginLeft: 5,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4
-    },
-    count: {
-
-    },
-})
+  container: {
+    gap: 10,
+    marginBottom: 35,
+    borderRadius: theme.radius.xxl * 1.1,
+    padding: 10,
+    paddingVertical: 12,
+    backgroundColor: 'white',
+    borderWidth: 0.5,
+    borderColor: theme.colors.gray,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  userInfo: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
+  username: {
+    fontWeight: theme.fonts.semiBold,
+    fontSize: 16,
+  },
+  postMedia: {
+    height: heigthPercentage(40),
+    width: '100%',
+    borderRadius: theme.radius.xl,
+    marginTop: 20,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 15,
+    marginTop: 10,
+  },
+  content: {},
+  postBody: {},
+  footerButton: {
+    marginLeft: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  count: {},
+});

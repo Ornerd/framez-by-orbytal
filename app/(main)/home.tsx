@@ -13,161 +13,148 @@ import { useRouter } from 'expo-router'
 import React, { useEffect, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 
+type Post = {
+  id: number;
+  userId?: string;
+  user?: any;
+  [key: string]: any;
+}
 
-var limit=0;
+let limit: number = 0;
+
 const Home = () => {
+  const { user, setAuth } = useAuth();
+  const router = useRouter();
 
-    const {user, setAuth} = useAuth();
-    const router = useRouter()
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [hasMorePosts, setHasMorePosts] = useState<boolean>(true);
 
-    const [posts, setPosts] = useState([])
-    const [hasMorePosts, setHasMorePosts] = useState(true)
+  const handlePostEvent = async (payload: any) => {
+    if (payload.eventType === 'INSERT' && payload?.new?.id) {
+      const newPost: Post = { ...payload.new };
+      const res = await getUserData(newPost.userId);
 
-    const handlePostEvent = async (payload) => {
-        if(payload.eventType == 'INSERT' && payload?.new?.id) {
-            let newPost = {...payload.new};
-            let res = await getUserData(newPost.userId);
-            newPost.user = res.success? res.data: {};
-            setPosts(prevPosts=> [newPost, ...prevPosts])
-        }
+      newPost.user = res.success ? res.data : {};
+      setPosts(prev => [newPost, ...prev]);
     }
+  };
 
-    useEffect(()=> {
+  useEffect(() => {
+    const postChannel = supabase
+      .channel('posts')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'posts' },
+        handlePostEvent
+      )
+      .subscribe();
 
-        let postChannel = supabase
-        .channel('posts')
-        .on('postgres_changes', {event: '*', schema: 'public', table: 'posts'}, handlePostEvent)
-        .subscribe();
+    return () => {
+      supabase.removeChannel(postChannel);
+    };
+  }, []);
 
-        // getPosts()
+  const getPosts = async (): Promise<void> => {
+    if (!hasMorePosts) return;
 
-        return ()=> {
-            supabase.removeChannel(postChannel)
-        }
-    }, [])
+    limit = limit + 6;
 
-    const getPosts = async () => {
-        //call the api
-        if(!hasMorePosts) return null;
-
-        limit = limit + 6
-        let res = await fetchPosts(limit);
-        if (res.success){
-            if(posts.length == res.data.length) {
-                setHasMorePosts(false)
-            }
-            setPosts(res.data)
-        }
+    const res = await fetchPosts(limit);
+    if (res.success) {
+      if (posts.length === res.data.length) {
+        setHasMorePosts(false);
+      }
+      setPosts(res.data);
     }
-
-    // const doTheLogout = async ()=> {
-    //    setAuth(null)
-    //    const {error} = await supabase.auth.signOut()
-    //    error && Alert.alert('Error signing out')
-    // }
+  };
 
   return (
     <ScreenWrapper bg="white">
-        <View style={styles.container}>
-            <View style={styles.topMenu}>
-                <Text style={styles.appName}>Framez</Text>
-                <View style={styles.icons}>
-                    <Pressable onPress={()=> router.push('/(main)/notifications')}>
-                        <Icon
-                        name='heart'
-                        size={32}
-                        strokeWidth={1}
-                        />
-                    </Pressable>
+      <View style={styles.container}>
+        <View style={styles.topMenu}>
+          <Text style={styles.appName}>Framez</Text>
 
-                    <Pressable onPress={()=>router.push('/(main)/newPost')}>
-                        <Icon
-                        name='plus'
-                        size={32}
-                        strokeWidth={1}
-                        />
-                    </Pressable>
+          <View style={styles.icons}>
+            <Pressable onPress={() => router.push('/(main)/notifications')}>
+              <Icon name="heart" size={32} strokeWidth={1} />
+            </Pressable>
 
-                    <Pressable onPress={()=>router.push('/(main)/profile')}>
-                        <AvatarDp 
-                        uri={user?.image}
-                        size= {heigthPercentage(5.3)}
-                        rounded={50}
-                        style={{borderWidth: 2}}
-                        />
-                    </Pressable>
-                </View>
-            </View>
-            
-            {/* the posts */}
-            <FlatList
-            data={posts} 
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listStyle} 
-            keyExtractor={item=> item.id.toString()}
-            renderItem={({item})=> <PostCard
-                item={item}
-                currentUser={user}
-                router={router}
-                />
-            } 
-            onEndReached={()=> {
-                getPosts();
-            }}
-            // onEndReachedThreshold={0}
-            ListFooterComponent={ hasMorePosts? (
-                <View style={{marginVertical: posts.length === 0 ? 200: 30}}>
-                    <Loading/>
-                </View>
-            ): (
-                <View style={{marginVertical: 30}}>
-                    <Text style={styles.noPosts}>No more posts for now</Text>
-                </View>
-            )}         
-            />
+            <Pressable onPress={() => router.push('/(main)/newPost')}>
+              <Icon name="plus" size={32} strokeWidth={1} />
+            </Pressable>
+
+            <Pressable onPress={() => router.push('/(main)/profile')}>
+              <AvatarDp
+                uri={user?.image}
+                size={heigthPercentage(5.3)}
+                rounded={50}
+                style={{ borderWidth: 2 }}
+              />
+            </Pressable>
+          </View>
         </View>
-    </ScreenWrapper>
-    
-  )
-}
 
-export default Home
+        <FlatList<Post>
+          data={posts}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listStyle}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <PostCard item={item} currentUser={user} router={router} />
+          )}
+          onEndReached={() => getPosts()}
+          ListFooterComponent={
+            hasMorePosts ? (
+              <View style={{ marginVertical: posts.length === 0 ? 200 : 30 }}>
+                <Loading />
+              </View>
+            ) : (
+              <View style={{ marginVertical: 30 }}>
+                <Text style={styles.noPosts}>No more posts for now</Text>
+              </View>
+            )
+          }
+        />
+      </View>
+    </ScreenWrapper>
+  );
+};
+
+export default Home;
 
 const styles = StyleSheet.create({
-     container: {
-        flex: 1,
-        paddingHorizontal: 24
-    },
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+  },
 
-    topMenu: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginVertical: 20
-    },
+  topMenu: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
 
-    appName: {
-        fontSize: 26,
-        fontWeight: theme.fonts.bold,
-        color: theme.colors.primary
-    },
+  appName: {
+    fontSize: 26,
+    fontWeight: theme.fonts.bold,
+    color: theme.colors.primary,
+  },
 
-    icons: {
-        flexDirection: 'row',
-        gap: 16,
-        alignItems: 'flex-end',
-        justifyContent: 'flex-end'
+  icons: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+  },
 
-    }, 
+  listStyle: {
+    paddingTop: 40,
+  },
 
-    listStyle: {
-        paddingTop: 40,
-        // paddingHorizontal: 24
-    },
-    
-    noPosts: {
-        fontSize: heigthPercentage(2),
-        textAlign: 'center',
-        color: theme.colors.text
-    }
-})
+  noPosts: {
+    fontSize: heigthPercentage(2),
+    textAlign: 'center',
+    color: theme.colors.text,
+  },
+});
