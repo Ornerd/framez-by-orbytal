@@ -20,6 +20,13 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
     const createdAt = moment(item?.created_at).fromNow()
     const likes = []
     const likedPost = false
+
+     const videoSourceUri = getSupabaseFileUrl(item?.file);
+
+        // Only render the Video component if we have a valid URI string
+        if (!videoSourceUri) {
+            return null; // or a placeholder/loader component
+        }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -66,12 +73,13 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
 
             )
         }
-        {/* if filei s avideo */}
+        
+        {/* if file is a video */}
         {
             item?.file && item?.file?.includes('postVideos') && (
                 <Video
                 style={[styles.postMedia, {height: heigthPercentage(30)}]}
-                source={getSupabaseFileUrl(item?.file)}
+                source={{ uri: videoSourceUri }}
                 useNativeControls
                 resizeMode ='cover'
                 isLooping
