@@ -70,7 +70,7 @@ const Login = () => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={{ flex: 1 }}
           >
-          <ScrollView style={{flex: 1}}>
+          <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
             <View style={styles.container}>
           <BackButton router={router}/>
             

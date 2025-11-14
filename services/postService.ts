@@ -52,6 +52,31 @@ export const fetchPosts= async (limit=10) => {
         return {success: false, msg: "Couldn't get any posts sorry"}
     }
 }
+export const fetchPostDetails= async (postId) => {
+    try {
+       const {data, error} = await supabase
+       .from('posts')
+       .select(`
+        *,
+        user: users (id, name, image),
+        postLikes (*),
+        comments (count)
+        `)
+       .eq('id', postId)
+       .single()
+
+       if(error){
+          console.log('fetchPostDetail error', error);
+        return {success: false, msg: "Couldn't get the posts sorry"}
+       }
+       return {success: true, data: data}
+    } catch (error) {
+        console.log('fetchPostDetail error', error);
+        return {success: false, msg: "Couldn't get the posts sorry"}
+    }
+}
+
+
 export const createPostLike = async (postLike) => {
     try {
       
@@ -71,7 +96,6 @@ export const createPostLike = async (postLike) => {
         return {success: false, msg: "Couldn't like the post sorry"}
     }
 }
-
 export const removePostLike = async (postId, userId) => {
     try {
       
@@ -89,5 +113,27 @@ export const removePostLike = async (postId, userId) => {
     } catch (error) {
         console.log('postLike error', error);
         return {success: false, msg: "Couldn't un-like the post sorry"}
+    }
+}
+
+
+export const createComment = async (comment) => {
+    try {
+      
+        const {data, error} = await supabase 
+        .from('comments')
+        .insert(comment)
+        .select()
+        .single()
+
+       if(error){
+          console.log('comment error', error);
+        return {success: false, msg: "Couldn't create a comment sorry"}
+       }
+
+       return {success: true, data: data}
+    } catch (error) {
+        console.log('comment error', error);
+        return {success: false, msg: "Couldn't create a comment sorry"}
     }
 }

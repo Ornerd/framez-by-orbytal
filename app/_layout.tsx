@@ -46,6 +46,13 @@ const MainLayout = () => {
   return <Stack 
     screenOptions={{
       headerShown: false
-    }}
-  />;
+      }}
+    >
+      <Stack.Screen
+      name="(main)/postDetails"
+      options={{
+        presentation: 'transparentModal'
+      }}
+      />
+    </Stack>;
 }

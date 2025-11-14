@@ -14,10 +14,11 @@ import AvatarDp from './AvatarDp'
 type PostCardProps = {
     item: any,
     currentUser: any,
-    router: any
+    router: any,
+    showMoreIcon: boolean
 }
 
-const PostCard = ({item, currentUser, router}: PostCardProps) => {
+const PostCard = ({item, currentUser, router, showMoreIcon=true}: PostCardProps) => {
     const createdAt = moment(item?.created_at).fromNow()
     const [likes, setLikes] = useState([])
 
@@ -62,6 +63,11 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
 
     const likedPost = likes.filter(like => like.userId == currentUser?.id)[0]? true: false
 
+    const openPostDetails = ()=> {
+        if(!showMoreIcon) return null;
+        router.push({pathname: 'postDetails', params: {postId: item?.id}})
+    }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -77,12 +83,14 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
             </View>
         </View>
 
-            <TouchableOpacity>
-                <Icon
-                name='threeDotsHorizontal'
-                size={heigthPercentage(3.4)}
-                />
-            </TouchableOpacity>
+            {showMoreIcon && (
+                <TouchableOpacity onPress={openPostDetails}>
+                    <Icon
+                    name='threeDotsHorizontal'
+                    size={heigthPercentage(3.4)}
+                    />
+                </TouchableOpacity>
+            )}
       </View>
 
       <View style={styles.content}>
@@ -137,12 +145,12 @@ const PostCard = ({item, currentUser, router}: PostCardProps) => {
             </Text>
         </View>
         <View style={styles.footerButton}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={openPostDetails}>
                 <Icon name='comment' size={30} color={theme.colors.textLight}/>
             </TouchableOpacity>
             <Text style={styles.count}>
                 {
-                    0
+                    item?.comments[0]?.count
                 }
             </Text>
         </View>
