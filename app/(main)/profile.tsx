@@ -74,10 +74,10 @@ const UserHeader = ({user, router, doTheLogout}: {user: any, router: any, doTheL
 
               <View style={{alignItems: 'center', gap: 4}}>
                   <Text style={styles.userName}>
-                    {user && user.name || user.user_metadata?.name}
+                    {user?.name ?? user?.user_metadata?.name ?? "Guest"}
                   </Text>
                   <Text style={styles.infoText}>
-                    {user && user.address}
+                    {user?.address ?? ""}
                   </Text>
               </View>
 
@@ -89,7 +89,7 @@ const UserHeader = ({user, router, doTheLogout}: {user: any, router: any, doTheL
                   color={theme.colors.textLight}
                   />
                   <Text style={styles.infoText}>
-                    {user && user.email}
+                    {user?.email ?? ""}
                   </Text>
                 </View>
                  <View style={styles.info}>
@@ -99,12 +99,12 @@ const UserHeader = ({user, router, doTheLogout}: {user: any, router: any, doTheL
                   color={theme.colors.textLight}
                   />
                   <Text style={styles.infoText}>
-                    {user && user.phoneNumber}
+                    {user?.phoneNumber ?? ""}
                   </Text>
                 </View>
                  <View style={styles.info}>
                   <Text style={styles.infoText}>
-                    {user && user.bio}
+                    {user?.bio ?? ""}
                   </Text>
                 </View>
               </View>

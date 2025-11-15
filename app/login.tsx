@@ -4,6 +4,7 @@ import Button from '@/components/Button'
 import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
+import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
@@ -15,6 +16,7 @@ const Login = () => {
   const emailRef = useRef('')
   const passwordRef = useRef('')
   const [loading, setLoading] = useState(false)
+   const {setAuth} = useAuth();
 
   const [errors, setErrors] = useState({ email: '', password: '' })
     // ✅ Email format validator
@@ -30,7 +32,7 @@ const Login = () => {
     if (!emailRef.current.trim()) {
       newErrors.email = 'Please enter your email address'
       isValid = false;
-    }else if (!isValidEmail(emailRef.current.trim())) {
+    } else if (!isValidEmail(emailRef.current.trim())) {
       newErrors.email = 'Please enter a valid email address'
       isValid = false;
     }
@@ -42,26 +44,50 @@ const Login = () => {
 
     setErrors(newErrors)
 
-     if (!isValid) {
-        return; 
+    if (!isValid) return;
+
+    let email = emailRef.current.trim();
+    let password = passwordRef.current.trim();
+
+    setLoading(true);
+
+    // STEP 1 — LOGIN
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoading(false);
+      Alert.alert('Login error:', error.message);
+      return;
     }
 
-     let email = emailRef.current.trim();
-     let password = passwordRef.current.trim();
+    const authUser = data.user;
 
-     setLoading(true); 
+    // STEP 2 — FETCH PROFILE
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", authUser.id)
+      .single();
 
-     const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    if (profileError) {
+      console.log("Profile fetch error:", profileError);
+    }
 
-      if(error) {
-        Alert.alert('Login error:', error.message)
-      }
+    // STEP 3 — MERGE AND SAVE IN AUTH CONTEXT
+    setAuth({
+      ...authUser,
+      ...profile,
+    });
 
-     setLoading(false); 
-  }
+    setLoading(false);
+
+    // OPTIONAL — navigate to home screen after login
+    router.replace("/(main)/home");
+  };
+
 
   return (
     <ScreenWrapper bg='white'>
