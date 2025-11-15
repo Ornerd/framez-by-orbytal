@@ -12,14 +12,15 @@ import { Alert, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'reac
 
 const Profile = () => {
 
-    const {user, setAuth} = useAuth();
+    const { user } = useAuth();
     const router = useRouter()
 
-    const logoutUser = async ()=> {
-      setAuth(null)
-        const {error} = await supabase.auth.signOut()
-        error && Alert.alert('Error signing out')
-    }
+    const logoutUser = async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        Alert.alert("Error signing out");
+      }
+    };
     
     const doTheLogout = async ()=> {
       Alert.alert('Confirm', 'Do you really want to leave?', [

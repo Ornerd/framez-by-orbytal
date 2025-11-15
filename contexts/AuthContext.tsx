@@ -1,7 +1,7 @@
-import { supabase } from "@/lib/supabase"; // adjust this import to your project path
+import { supabase } from "@/lib/supabase";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
-interface User {
+interface UserProfile {
   id: string;
   email?: string;
   name?: string;
@@ -13,84 +13,84 @@ interface User {
 }
 
 interface AuthContextType {
-  user: User | null;
-  setAuth: (authUser: User | null) => void;
-  setUserData: (userData: User) => void;
-  loading: boolean;
+  user: UserProfile | null;
+  loadingUser: boolean; // <-- important
+  setUserData: (data: Partial<UserProfile>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
-export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // 🔥 Fetch profile from DB
+  const loadProfile = async (authUser: any) => {
+    try {
+      const { data: profile } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", authUser.id)
+        .single();
 
-  const setAuth = (authUser: User | null) => {
-    setUser(authUser);
+      return { ...authUser, ...profile };
+    } catch {
+      return authUser;
+    }
   };
 
-  const setUserData = (userData: User) => {
-    setUser(prev => ({ ...prev, ...userData }));
-  };
-
-  // Rehydrate user from Supabase on startup
+  // 🔄 On startup load session + profile
   useEffect(() => {
-    const loadUser = async () => {
-      setLoading(true);
+    const init = async () => {
+      setLoadingUser(true);
 
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
       if (session?.user) {
-        const { data: profile, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-
-        if (!error && profile) {
-          setUser({ ...session.user, ...profile });
-        } else {
-          // fallback to session data if no profile row found
-          setUser(session.user);
-        }
-      }
-
-      setLoading(false);
-    };
-
-    loadUser();
-
-    // 🔄 Optional: subscribe to auth changes (login/logout)
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
+        const fullUser = await loadProfile(session.user);
+        setUser(fullUser);
       } else {
         setUser(null);
       }
-    });
 
-    return () => {
-      subscription.subscription.unsubscribe();
+      setLoadingUser(false);
     };
+
+    init();
+
+    // 🔔 Listen to login/logout events
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (session?.user) {
+          setLoadingUser(true);
+          const fullUser = await loadProfile(session.user);
+          setUser(fullUser);
+          setLoadingUser(false);
+        } else {
+          setUser(null);
+          setLoadingUser(false);
+        }
+      }
+    );
+
+    return () => subscription.subscription.unsubscribe();
   }, []);
 
+  const setUserData = (data: Partial<UserProfile>) => {
+    setUser((prev) => (prev ? { ...prev, ...data } : prev));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setAuth, setUserData, loading }}>
+    <AuthContext.Provider value={{ user, loadingUser, setUserData }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 };

@@ -1,58 +1,50 @@
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
-import { getUserData } from "@/services/userService";
 import { Stack, useRouter } from "expo-router";
 import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
 
-export default function _layout () {
+export default function RootLayout() {
   return (
     <AuthProvider>
-      <MainLayout/>
+      <MainLayout />
     </AuthProvider>
-  )
+  );
 }
 
 const MainLayout = () => {
+  const { user, loadingUser } = useAuth();
+  const router = useRouter();
 
-  const {setAuth, setUserData} = useAuth();
-  const router = useRouter()
+  useEffect(() => {
+    if (loadingUser) return; // wait for hydration
 
-  useEffect(()=>{
-    supabase.auth.onAuthStateChange((_event, session) => {
-      if(session) {
-        //set authentication
-        setAuth(session?.user)
-
-        updateUserData(session?.user)
-        //move authentic user to dashboard
-        router.replace('/home')
-      }else{
-        //make auth null
-         setAuth(null)
-        //move to welcome screen
-        router.replace('/welcome')
-      }
-    })
-  }, [])
-
-  const updateUserData = async (user: any)=> {
-    let res = await getUserData(user?.id)
-    const resultingData = res.data
-    if (res.success) {
-      setUserData(resultingData)
+    if (user) {
+      router.replace("/(main)/home");
+    } else {
+      router.replace("/welcome");
     }
+  }, [user, loadingUser]);
+
+  if (loadingUser) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
-  return <Stack 
-    screenOptions={{
-      headerShown: false
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
       }}
     >
       <Stack.Screen
-      name="(main)/postDetails"
-      options={{
-        presentation: 'modal'
-      }}
+        name="(main)/postDetails"
+        options={{
+          presentation: "modal",
+        }}
       />
-    </Stack>;
-}
+    </Stack>
+  );
+};

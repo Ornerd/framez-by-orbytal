@@ -4,7 +4,6 @@ import Button from '@/components/Button'
 import Input from '@/components/Input'
 import ScreenWrapper from '@/components/ScreenWrapper'
 import { theme } from '@/constants/theme'
-import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'expo-router'
 import React, { useRef, useState } from 'react'
@@ -16,7 +15,7 @@ const Login = () => {
   const emailRef = useRef('')
   const passwordRef = useRef('')
   const [loading, setLoading] = useState(false)
-   const {setAuth} = useAuth();
+
 
   const [errors, setErrors] = useState({ email: '', password: '' })
     // ✅ Email format validator
@@ -51,7 +50,6 @@ const Login = () => {
 
     setLoading(true);
 
-    // STEP 1 — LOGIN
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -62,27 +60,7 @@ const Login = () => {
       Alert.alert('Login error:', error.message);
       return;
     }
-
-    const authUser = data.user;
-
-    // STEP 2 — FETCH PROFILE
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", authUser.id)
-      .single();
-
-    if (profileError) {
-      console.log("Profile fetch error:", profileError);
-    }
-
-    // STEP 3 — MERGE AND SAVE IN AUTH CONTEXT
-    setAuth({
-      ...authUser,
-      ...profile,
-    });
-
-    setLoading(false);
+      setLoading(false);
 
     // OPTIONAL — navigate to home screen after login
     router.replace("/(main)/home");
