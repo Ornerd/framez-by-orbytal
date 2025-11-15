@@ -9,16 +9,12 @@ type ExtraConfig = {
   supabaseAnonKey: string;
 };
 
-const extra = (Constants.expoConfig?.extra ?? {}) as Partial<ExtraConfig>;
-
-if (!extra.supabaseUrl || !extra.supabaseAnonKey) {
-  throw new Error(
-    "Supabase keys are missing. Make sure supabaseUrl and supabaseAnonKey exist in app.config.js under expo.extra"
-  );
-}
-
+const extra = Constants.expoConfig?.extra; 
 
 export const supabase = createClient(extra.supabaseUrl, extra.supabaseAnonKey, {
+  
+
+
   auth: {
     ...(Platform.OS !== "web" ? { storage: AsyncStorage } : {}),
     autoRefreshToken: true,

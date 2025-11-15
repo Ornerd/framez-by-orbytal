@@ -1,8 +1,21 @@
-import { supabaseUrl } from '@/constants'
-import { supabase } from '@/lib/supabase'
-import { decode } from 'base64-arraybuffer'
-import * as FileSystem from 'expo-file-system/legacy'
+import { supabase } from '@/lib/supabase';
+import { decode } from 'base64-arraybuffer';
+import Constants from "expo-constants";
+import * as FileSystem from 'expo-file-system/legacy';
 
+
+type ExtraConfig = {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
+};
+
+const extra = (Constants.expoConfig?.extra ?? {}) as Partial<ExtraConfig>;
+
+if (!extra.supabaseUrl || !extra.supabaseAnonKey) {
+  throw new Error(
+    "Supabase keys are missing. Make sure supabaseUrl and supabaseAnonKey exist in app.config.js under expo.extra"
+  );
+}
 
 export const getUserImageSrc = (imagePath) => {
     if(imagePath) {
@@ -14,7 +27,7 @@ export const getUserImageSrc = (imagePath) => {
 
 export const getSupabaseFileUrl = filePath => {
     if(filePath){
-        return `${supabaseUrl}/storage/v1/object/public/uploads/${filePath}`
+        return `${extra.supabaseUrl}/storage/v1/object/public/uploads/${filePath}`
     }
 }
 
